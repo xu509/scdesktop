@@ -137,7 +137,7 @@ namespace scdesktop
             var d = UnityEngine.Random.Range(0f, 1f);
             Vector3 startPoint = Vector3.Lerp(_startPoint.position + new Vector3(0, _startGenRange, 0), _startPoint.position - new Vector3(0, _startGenRange, 0), d);
             Vector3 endPoint = Vector3.Lerp(_endPoint.position + new Vector3(0, _endGenRange, 0), _endPoint.position - new Vector3(0, _endGenRange, 0), d);
-            float lineWidth = Mathf.Lerp(0.2f, 0.4f, d);
+            float lineWidth = Mathf.Lerp(0.1f, 0.4f, d);
             lineAgent.Init(startPoint, endPoint, lineWidth,
                 GetDensityParam(), GetSpeedParam(), GetXOffsetParam(),
                 GetYOffsetParam(),

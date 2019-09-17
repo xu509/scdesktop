@@ -46,7 +46,7 @@ namespace scdesktop
         {
             if ((Time.time - _lastActiveTime) > _destoryIntervalTime  && (_status  == CardStatusEnum.Open)) {
                 // 进行第一次缩小
-                Debug.Log("进行第一次缩小");
+                //Debug.Log("进行第一次缩小");
                 _status = CardStatusEnum.Destorying;
                 var nowScale = GetComponent<Transform>().localScale;
                 var toScale = nowScale * 0.6f;
@@ -59,7 +59,7 @@ namespace scdesktop
 
             if ((Time.time - _destoryStartTime) > DESTORY_CONFIRM_TIME && (_status == CardStatusEnum.Destorying))
             {
-                Debug.Log("进行销毁");
+                //Debug.Log("进行销毁");
 
                 _status = CardStatusEnum.DestoryingCompleted;
                 // 销毁cardagent;
@@ -99,6 +99,14 @@ namespace scdesktop
                     _status = CardStatusEnum.Destoryed;
             });
         }
+
+
+        public void Recover() {
+            // TODO recover
+            // TODO recover
+        }
+
+
 
     }
 

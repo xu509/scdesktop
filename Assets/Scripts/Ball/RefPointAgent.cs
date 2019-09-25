@@ -16,6 +16,12 @@ namespace scdesktop
         [SerializeField]
         SpriteRenderer _spriteRenderer;
 
+        [SerializeField]
+        bool _needReversal;
+        public bool needReversal { get { return _needReversal; } }
+
+
+
         public RefPointAgent[] nearlyRefPointAgents { get { return _nearlyRefPointAgents; } }
 
 

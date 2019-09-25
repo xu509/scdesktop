@@ -2,13 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace scdesktop
 {
-    public class CardAgent : MonoBehaviour
+    public class CardAgent : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerClickHandler
     {
         // 关闭时间       
         [SerializeField] float _destoryIntervalTime;
+        [SerializeField] Image _detailCover;
+
+        [SerializeField] Sprite _btnCloseSprite;
+        [SerializeField] RectTransform _closeBtn;
+
+
 
         private float _lastActiveTime;
         private float _destoryStartTime;
@@ -27,7 +35,7 @@ namespace scdesktop
 
 
         public enum CardStatusEnum {
-            Open,Destorying,DestoryingCompleted,Destoryed
+            Open,Destorying,DestoryingCompleted,Destoryed,Recover
         }
 
 
@@ -67,7 +75,6 @@ namespace scdesktop
                     .OnComplete(() => {
                         _status = CardStatusEnum.Destoryed;                                        
                     });
-
             }
 
 
@@ -84,6 +91,17 @@ namespace scdesktop
 
             _refBallAgent = ballAgent;
             _refPointAgent = refPointAgent;
+
+
+            if (refPointAgent.needReversal) {
+                GetComponent<RectTransform>().DORotate(new Vector3(180,180,0), Time.deltaTime);
+            }
+
+
+            // 设置图片
+            string detailCoverStr = "data/" + ballAgent.ballData.detailCover;
+            _detailCover.sprite = Resources.Load<Sprite>(detailCoverStr);
+
         }
 
 
@@ -102,12 +120,66 @@ namespace scdesktop
 
 
         public void Recover() {
-            // TODO recover
-            // TODO recover
+            _status = CardStatusEnum.Recover;
+
+            Debug.Log("进行恢复");
+
+            Vector3 to = new Vector3(1.6f, 1.6f, 1f);
+
+            DoUpdated();
+
+            GetComponent<Transform>().DOScale(to, 1f)
+                .OnComplete(() => {
+                    _status = CardStatusEnum.Open;
+                    DoUpdated();
+                });
+        }
+
+
+        public void DoClose() {
+            _closeBtn.GetComponent<Image>().sprite = _btnCloseSprite;
+
+            DirectClose();
+
+        }
+
+        private void DoUpdated() {
+            if (_status == CardStatusEnum.Destorying) {
+                Recover();
+            }
+
+            _lastActiveTime = Time.time;
+
         }
 
 
 
+
+
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            //throw new System.NotImplementedException();
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            //throw new System.NotImplementedException();
+            DoUpdated();
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            //Debug.Log("click!");
+            DoUpdated();
+
+            //throw new System.NotImplementedException();
+        }
+
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            //throw new System.NotImplementedException();
+        }
     }
 
 

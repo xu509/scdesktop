@@ -10,6 +10,17 @@ namespace scdesktop
     public class WaterWallManager : MonoBehaviour
     {
         [SerializeField] LinesManager _LinesManager;
+        [SerializeField] BallsManager _ballsManager;
+
+        MainManager _manager;
+
+
+        public void Init(MainManager manager) {
+            _manager = manager;
+            _ballsManager.Init(_manager);
+        }
+
+
 
         // Start is called before the first frame update
         void Start()

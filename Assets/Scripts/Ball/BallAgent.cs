@@ -14,6 +14,11 @@ namespace scdesktop
         private float _speed;
         private Vector3 _clickScreenOffset;
 
+        private BallData _ballData;
+        public BallData ballData { get { return _ballData; } }
+
+
+
 
         private CardAgent _refCardAgent;
         public CardAgent refCardAgent { set { _refCardAgent = value; } get { return _refCardAgent; } }
@@ -50,8 +55,10 @@ namespace scdesktop
         /// <param name="speed">0 -> 1</param>
         /// <param name="birthPosition"></param>
         /// <param name="scaleFactor">0.5 -> 2.0</param>
-        public void Init(float speed,Vector3 birthPosition,float scaleFactor,BallsManager ballsManager) {
+        public void Init(float speed,Vector3 birthPosition,float scaleFactor,BallsManager ballsManager,BallData ballData) {
             _ballsManager = ballsManager;
+            _ballData = ballData;
+
 
             _speed = speed;
             transform.position = birthPosition;
@@ -64,11 +71,19 @@ namespace scdesktop
             _ballStatus = BallStatusEnum.flow;
 
 
+            string coverAddress = "data/" + ballData.cover;
+
+            //Debug.Log("coverAddress : " + coverAddress);
+
+            var sprite = Resources.Load<Sprite>(coverAddress);
+            spriteRenderer.sprite = sprite;
+
+
             // 设置图片
-            SpriteAtlas spriteAtlas = Resources.Load<SpriteAtlas>("SpriteAtlas");
-            string[] spriteAtlasAry = { "1", "2", "3", "4" };
+            //SpriteAtlas spriteAtlas = Resources.Load<SpriteAtlas>("SpriteAtlas");
+            //string[] spriteAtlasAry = { "1", "2", "3", "4" };
                      
-            spriteRenderer.sprite = spriteAtlas.GetSprite(spriteAtlasAry[Random.Range(0, 4)]);
+            //spriteRenderer.sprite = spriteAtlas.GetSprite(spriteAtlasAry[Random.Range(0, 4)]);
 
 
         }

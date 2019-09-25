@@ -12,12 +12,27 @@ namespace scdesktop
         [SerializeField] WaterWallManager _waterWallManager;
         [SerializeField] OverLookWallManager _overLookWallManager;
 
+        [SerializeField] ShicunDaoService shicunDaoService;
+
+
+
+        private IDaoService _daoService;
+        public IDaoService daoService { get { return _daoService; } }
+
+
         private SceneEnum _currentScene = SceneEnum.WaterWall;
 
         // Start is called before the first frame update
         void Start()
         {
             TurnOnWaterWallScene();
+
+            _waterWallManager.Init(this);
+
+
+            _daoService = shicunDaoService;
+            daoService.prepareData();
+
         }
 
         // Update is called once per frame

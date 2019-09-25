@@ -27,6 +27,9 @@ namespace scdesktop
         [SerializeField] CardAgent _cardAgentPrefab;
         [SerializeField] Transform _cardContainer;
 
+        MainManager _manager;
+
+
 
         private float _lastGenerateTime = -10f;    // 上一个生成的时间
         private GeneratePosition _lastGeneratePosition; //  生成位置
@@ -39,7 +42,13 @@ namespace scdesktop
         private static float BIRTH_INTERVAL_TIME_CONST = 1f;
 
 
-        
+        public void Init(MainManager manager)
+        {
+            _manager = manager;
+        }
+
+
+
         enum GeneratePosition {
             UP,DOWN
         }
@@ -63,7 +72,12 @@ namespace scdesktop
                 offsetY = getYOffset(offsetY);
 
                 var agent = Instantiate(_ballAgentPrefab,_ballsContainer);
-                agent.Init(Random.Range(0f,1f), _birthPosition.position + new Vector3(0,offsetY,0), getScaleFactor(),this);
+
+                float offsetZ = Mathf.Lerp(-2, 2, Random.Range(0, 1f));
+
+                var data = _manager.daoService.GetItem();
+                agent.Init(Random.Range(0f,1f), _birthPosition.position + new Vector3(0,offsetY, offsetZ), getScaleFactor(),this,data);
+                
                 _ballAgents.Add(agent);
             }
 

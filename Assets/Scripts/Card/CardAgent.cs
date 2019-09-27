@@ -96,9 +96,6 @@ namespace scdesktop
             _refPointAgent = refPointAgent;
 
 
-            if (refPointAgent.needReversal) {
-                GetComponent<RectTransform>().DORotate(new Vector3(180,180,0), Time.deltaTime);
-            }
 
 
             // 设置图片

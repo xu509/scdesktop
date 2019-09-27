@@ -25,6 +25,7 @@ namespace scdesktop
         [SerializeField] Transform _ballsContainer;
         [SerializeField] RefPointAgent[] _refPointAgents;
         [SerializeField] CardAgent _cardAgentPrefab;
+        [SerializeField] CardAgent _cardAgentRePrefab;
         [SerializeField] Transform _cardContainer;
 
         [SerializeField] SymbolAgent _symbolAgentPrefab;
@@ -129,6 +130,7 @@ namespace scdesktop
             for (int i = 0; i < cardsNeedDestory.Count; i++)
             {
                 var item = cardsNeedDestory[i];
+                item.refBallAgent.ballStatus = BallStatusEnum.destorying;
                 _cardAgents.Remove(item);
 
                 // 销毁card
@@ -228,6 +230,9 @@ namespace scdesktop
 
             //Debug.Log("Near Ref is : " + nearAvailableAgent.gameObject.name);
 
+            return nearAvailableAgent;
+
+
 
             // 空闲时则直接返回
             if (nearAvailableAgent.refPointStatus == RefPointAgent.RefPointStatusEnum.vacant)
@@ -299,28 +304,28 @@ namespace scdesktop
         /// <param name="ballAgent"></param>
         public void OpenCard(RefPointAgent refPointAgent, BallAgent ballAgent) {
 
-            if (refPointAgent.refPointStatus == RefPointAgent.RefPointStatusEnum.busy)
-            {
-                var oriBallAgent = refPointAgent.ballAgent;
+            //if (refPointAgent.refPointStatus == RefPointAgent.RefPointStatusEnum.busy)
+            //{
+            //    var oriBallAgent = refPointAgent.ballAgent;
 
-                //  关闭原有卡片
-                if (oriBallAgent.refCardAgent == null)
-                {
-                    // 关闭数据球
-                    oriBallAgent.DestoryIt();
+            //    //  关闭原有卡片
+            //    if (oriBallAgent.refCardAgent == null)
+            //    {
+            //        // 关闭数据球
+            //        oriBallAgent.DestoryIt();
 
-                    refPointAgent.Clear();
-                }
-                else {
+            //        refPointAgent.Clear();
+            //    }
+            //    else {
 
-                    // 关闭数据球、关闭卡片
-                    oriBallAgent.refCardAgent.DirectClose();
-                    oriBallAgent.DestoryIt();
+            //        // 关闭数据球、关闭卡片
+            //        oriBallAgent.refCardAgent.DirectClose();
+            //        oriBallAgent.DestoryIt();
 
-                    refPointAgent.Clear();
-                }               
+            //        refPointAgent.Clear();
+            //    }               
 
-            }
+            //}
 
             // 打开卡片
 
@@ -341,14 +346,35 @@ namespace scdesktop
                     ballAgent.ballStatus = BallStatusEnum.opened;
                     ballAgent.gameObject.SetActive(false);
 
-                    CardAgent cardAgent = Instantiate(_cardAgentPrefab, _cardContainer);
+                    CardAgent cardAgent;
+
+
+                    if (refPointAgent.needReversal)
+                    {
+                        cardAgent = Instantiate(_cardAgentRePrefab, _cardContainer);
+
+                    }
+                    else {
+                        cardAgent = Instantiate(_cardAgentPrefab, _cardContainer);
+                    }
+
                     //cardAgent
                     var genWorldPosition = ballAgent.GetComponent<Transform>().position;
                     cardAgent.Init(genWorldPosition, ballAgent, refPointAgent);
 
+
+
+                    //if (cardAgent.refPointAgent.needReversal)
+                    //{
+                    //    cardAgent.GetComponent<RectTransform>().Rotate(new Vector3(180, 180, 0), Space.Self);
+                        
+                    //    //.DORotate(new Vector3(180, 180, 0), Time.deltaTime);
+                    //}
+
+
                     // 放大
-                    Vector3 cardToScale = new Vector3(1.6f, 1.6f, 1f);
-                    cardAgent.OpenTweener = cardAgent.GetComponent<Transform>().DOScale(cardToScale, 1.5f);
+                    Vector3 cardToScale = new Vector3(1.6f, 1.6f, 1.6f);
+                    cardAgent.OpenTweener = cardAgent.GetComponent<Transform>().DOScale(cardToScale, 1f);
 
                     ballAgent.refCardAgent = cardAgent;
                     _cardAgents.Add(cardAgent);

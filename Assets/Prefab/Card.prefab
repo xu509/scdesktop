@@ -123,7 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db900f56ad3806d47abf28a0424bfd3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _destoryIntervalTime: 5
+  _destoryIntervalTime: 15
   _detailCover: {fileID: 3191466574392988831}
   _btnCloseSprite: {fileID: 21300000, guid: c8db0b8d23337084c9612c34879c1553, type: 3}
   _closeBtn: {fileID: 8705841722805330491}

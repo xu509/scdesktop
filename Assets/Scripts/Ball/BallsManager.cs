@@ -27,12 +27,20 @@ namespace scdesktop
         [SerializeField] CardAgent _cardAgentPrefab;
         [SerializeField] Transform _cardContainer;
 
+        [SerializeField] SymbolAgent _symbolAgentPrefab;
+
+
         MainManager _manager;
 
 
 
         private float _lastGenerateTime = -10f;    // 上一个生成的时间
         private GeneratePosition _lastGeneratePosition; //  生成位置
+
+
+        private float _lastSymbolTime = -10f;    // 上一个生成的时间
+
+
 
         private List<BallAgent> _ballAgents;
         private List<CardAgent> _cardAgents;
@@ -73,13 +81,26 @@ namespace scdesktop
 
                 var agent = Instantiate(_ballAgentPrefab,_ballsContainer);
 
-                float offsetZ = Mathf.Lerp(-2, 2, Random.Range(0, 1f));
+                float offsetZ = Mathf.Lerp(-2f, -0.1f, Random.Range(0, 1f));
 
                 var data = _manager.daoService.GetItem();
                 agent.Init(Random.Range(0f,1f), _birthPosition.position + new Vector3(0,offsetY, offsetZ), getScaleFactor(),this,data);
-                
+
+                // 随机正反                
+
                 _ballAgents.Add(agent);
             }
+
+            if (CanGenerateSymbols()) {
+                float offsetY = Mathf.Lerp(-(BIRTH_POSITION_CONST * _birthPositionOffset), BIRTH_POSITION_CONST * _birthPositionOffset, Random.Range(0f, 1f));
+                offsetY = getYOffset(offsetY);
+                var symbol = Instantiate(_symbolAgentPrefab, _ballsContainer);
+
+                float offsetZ = Mathf.Lerp(-2f, -0.1f, Random.Range(0, 1f));
+                symbol.Init(Random.Range(0f, 1f), _birthPosition.position + new Vector3(0, offsetY, offsetZ),Random.Range(0.15f,0.3f));
+
+            }
+
 
             // 清理需要删除的数据球
             List<BallAgent> ballsNeedDestory = new List<BallAgent>();
@@ -129,6 +150,19 @@ namespace scdesktop
 
             if ((Time.time - birthTimeItv) > _lastGenerateTime) {
                 _lastGenerateTime = Time.time;
+                return true;
+            }
+
+            return false;
+        }
+
+        bool CanGenerateSymbols()
+        {
+            float birthTimeItv = Mathf.Lerp(_birthIntervalTimeRangeMin, _birthIntervalTimeRangeMax, Random.Range(0f, 1f)) * BIRTH_INTERVAL_TIME_CONST + BIRTH_INTERVAL_TIME_CONST;
+
+            if ((Time.time - birthTimeItv) > _lastSymbolTime)
+            {
+                _lastSymbolTime = Time.time;
                 return true;
             }
 
@@ -226,6 +260,38 @@ namespace scdesktop
             }
         }
 
+
+
+        /// <summary>
+        /// 获取可用的 参考标记点
+        /// 获取逻辑： https://www.yuque.com/u314548/lbo6va/phnmy7
+        /// </summary>
+        /// <param name="position">世界坐标</param>
+        /// <returns></returns>
+        public RefPointAgent GetAvailableRefPoint2(Vector3 position)
+        {
+            RefPointAgent nearAvailableAgent = _refPointAgents[0];
+            float shortestDistance = 100000;
+
+
+            // 计算最近的参照点
+            for (int i = 0; i < _refPointAgents.Length; i++)
+            {
+                var agentPosition = _refPointAgents[i].gameObject.transform.position;
+                var distance = Vector3.Distance(agentPosition, position);
+                //Debug.Log("R - " + _refPointAgents[i].gameObject.name + "  distances : " + distance);
+                if (distance < shortestDistance)
+                {
+                    shortestDistance = distance;
+                    nearAvailableAgent = _refPointAgents[i];
+                }
+            }
+
+
+            return nearAvailableAgent;
+
+        }
+
         /// <summary>
         ///     打开卡片
         /// </summary>
@@ -233,36 +299,67 @@ namespace scdesktop
         /// <param name="ballAgent"></param>
         public void OpenCard(RefPointAgent refPointAgent, BallAgent ballAgent) {
 
+            if (refPointAgent.refPointStatus == RefPointAgent.RefPointStatusEnum.busy)
+            {
+                var oriBallAgent = refPointAgent.ballAgent;
+
+                //  关闭原有卡片
+                if (oriBallAgent.refCardAgent == null)
+                {
+                    // 关闭数据球
+                    oriBallAgent.DestoryIt();
+
+                    refPointAgent.Clear();
+                }
+                else {
+
+                    // 关闭数据球、关闭卡片
+                    oriBallAgent.refCardAgent.DirectClose();
+                    oriBallAgent.DestoryIt();
+
+                    refPointAgent.Clear();
+                }               
+
+            }
+
+            // 打开卡片
+
             // agent 移动到 refpoint 的位置
+            refPointAgent.ballAgent = ballAgent;
+            refPointAgent.refPointStatus = RefPointAgent.RefPointStatusEnum.busy;
+
+
             var to = refPointAgent.GetComponent<Transform>().position;
-            ballAgent.GetComponent<Transform>().DOMove(to, 0.5f).OnComplete(()=> {
-                Debug.Log("On Complete");
+
+            var tweenerMove = ballAgent.GetComponent<Transform>().DOMove(to, 0.5f).OnComplete(() => {
 
                 // 缩小到一定比例
                 Vector3 toScale = new Vector3(0.2f, 0.2f, 1f);
-                ballAgent.GetComponent<Transform>().DOScale(toScale, 1f).OnComplete(()=> {
+                var tweenerSmall = ballAgent.GetComponent<Transform>().DOScale(toScale, 1f).OnComplete(() => {
 
                     // 创建卡片走向幕前
                     ballAgent.ballStatus = BallStatusEnum.opened;
                     ballAgent.gameObject.SetActive(false);
 
-                    refPointAgent.refPointStatus = RefPointAgent.RefPointStatusEnum.busy;
-                    refPointAgent.ballAgent = ballAgent;
-
                     CardAgent cardAgent = Instantiate(_cardAgentPrefab, _cardContainer);
                     //cardAgent
                     var genWorldPosition = ballAgent.GetComponent<Transform>().position;
-                    cardAgent.Init(genWorldPosition,ballAgent,refPointAgent);
+                    cardAgent.Init(genWorldPosition, ballAgent, refPointAgent);
 
                     // 放大
                     Vector3 cardToScale = new Vector3(1.6f, 1.6f, 1f);
-                    cardAgent.GetComponent<Transform>().DOScale(cardToScale, 1.5f);
+                    cardAgent.OpenTweener = cardAgent.GetComponent<Transform>().DOScale(cardToScale, 1.5f);
 
                     ballAgent.refCardAgent = cardAgent;
-
                     _cardAgents.Add(cardAgent);
                 });
+
+                ballAgent.SmallTweener = tweenerSmall;
             });
+
+            ballAgent.MoveTweener = tweenerMove;
+
+
 
 
             refPointAgent.Mark();

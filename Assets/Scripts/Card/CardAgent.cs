@@ -17,6 +17,9 @@ namespace scdesktop
         [SerializeField] RectTransform _closeBtn;
 
 
+        private Tweener _openTweener;
+        public Tweener OpenTweener { set { _openTweener = value; } get { return _openTweener; } }
+
 
         private float _lastActiveTime;
         private float _destoryStartTime;
@@ -109,6 +112,11 @@ namespace scdesktop
         /// 直接关闭
         /// </summary>
         public void DirectClose() {
+
+            if (_openTweener.active) {
+                _openTweener.Kill();
+            }
+
 
             _status = CardStatusEnum.DestoryingCompleted;
             // 销毁cardagent;

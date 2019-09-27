@@ -11,6 +11,7 @@ namespace scdesktop
     {
         [SerializeField] WaterWallManager _waterWallManager;
         [SerializeField] OverLookWallManager _overLookWallManager;
+        [SerializeField] MusicManager _musicManager;
 
         [SerializeField] ShicunDaoService shicunDaoService;
 
@@ -32,6 +33,8 @@ namespace scdesktop
 
             _daoService = shicunDaoService;
             daoService.prepareData();
+
+            _musicManager.Play();
 
         }
 

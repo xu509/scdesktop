@@ -112,10 +112,10 @@ namespace scdesktop
 
             _status = CardStatusEnum.DestoryingCompleted;
             // 销毁cardagent;
-            GetComponent<Transform>().DOScale(Vector3.zero, 1f)
+            GetComponent<Transform>().DOScale(Vector3.zero, 0.5f)
                 .OnComplete(() => {
                     _status = CardStatusEnum.Destoryed;
-            });
+            }).SetEase(Ease.InBack);
         }
 
 

@@ -65,7 +65,7 @@ namespace scdesktop
                 data.detailCover = str[i, 1];
 
 
-                Debug.Log(data.ToString());
+                //Debug.Log(data.ToString());
                 _items.Add(data);
             }            
         }

@@ -180,6 +180,9 @@ namespace scdesktop
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (_ballStatus == BallStatusEnum.opening) {
+                return; 
+            }
 
 
             var selfScreenPosition = Camera.main.WorldToScreenPoint(transform.position);
@@ -190,10 +193,8 @@ namespace scdesktop
             if (_ballStatus != BallStatusEnum.dragging)
             {
                 // 获取点击处与物体中心的偏移量
-                //var startDragPosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, selfScreenPosition.z);
                 var startDragPosition = mousePosition;
                 _clickScreenOffset = selfScreenPosition - startDragPosition;
-
                 _lastActivePosition = startDragPosition;
             }
 
@@ -244,8 +245,12 @@ namespace scdesktop
 
 
         private void DoOpenCard() {
-            OpenCard();
-            _ballStatus = BallStatusEnum.opening;
+            if (_ballStatus != BallStatusEnum.opening) {
+                _ballStatus = BallStatusEnum.opening;
+                OpenCard();
+            }
+
+
         }
 
 
